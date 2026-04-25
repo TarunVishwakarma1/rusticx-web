@@ -1,0 +1,83 @@
+---
+title: MongoDB
+description: Setting up and using rusticx with MongoDB and the mongo feature flag.
+---
+
+## Setup
+
+```toml
+[dependencies]
+rusticx = { version = "0.1", features = ["mongo"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+```
+
+## Creating a Repo
+
+MongoDB requires a database name in addition to the connection string:
+
+```rust
+use rusticx::prelude::*;
+
+let repo = MongoRepo::<User>::new("mongodb://localhost:27017", "mydb").await?;
+repo.migrate().await?;
+```
+
+`migrate()` on MongoDB creates the collection if it does not exist and sets up any indexes defined by `#[rusticx(unique)]` attributes.
+
+## Key Differences from SQL Backends
+
+| Concept | SQL (Postgres/MySQL) | MongoDB |
+|---|---|---|
+| Storage | Table | Collection |
+| Row | Row | Document (BSON) |
+| Schema | Enforced | Flexible |
+| Joins | `JOIN` | Embedded documents / `$lookup` |
+| `migrate()` | `CREATE TABLE` | Create collection + indexes |
+| Raw query | `execute_raw` / `query_raw` | Not yet supported — use `adapter().collection()` |
+
+## Model Definition
+
+MongoDB models use the same `#[derive(Model)]` syntax. The `table` attribute sets the collection name:
+
+```rust
+#[derive(Model, Serialize, Deserialize, Debug)]
+#[rusticx(table = "users")]
+pub struct User {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    #[rusticx(unique)]
+    pub email: String,
+    pub name: String,
+    #[rusticx(nullable)]
+    pub bio: Option<String>,
+}
+```
+
+## Querying
+
+The same query builder API applies:
+
+```rust
+let users = repo
+    .find()
+    .where_clause("name", CondOp::Eq, "Alice")
+    .limit(10)
+    .fetch_all()
+    .await?;
+```
+
+rusticx translates `CondOp` values to MongoDB filter documents automatically.
+
+## Running MongoDB Locally
+
+```bash
+docker run --name rusticx-mongo \
+  -p 27017:27017 \
+  -d mongo:7
+```
+
+```bash
+export DATABASE_URL="mongodb://localhost:27017"
+```

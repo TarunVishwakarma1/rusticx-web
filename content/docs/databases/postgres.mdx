@@ -1,0 +1,87 @@
+---
+title: PostgreSQL
+description: Setting up and using rusticx with PostgreSQL and the postgres feature flag.
+---
+
+## Setup
+
+Add rusticx with the `postgres` feature to `Cargo.toml`:
+
+```toml
+[dependencies]
+rusticx = { version = "0.1", features = ["postgres"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+```
+
+## Connection String
+
+```
+postgres://username:password@host:port/database
+```
+
+Common formats:
+
+```bash
+# Local development (no password)
+postgres://localhost/mydb
+
+# Full credentials
+postgres://alice:secret@localhost:5432/production
+
+# With SSL
+postgres://alice:secret@db.example.com:5432/production?sslmode=require
+```
+
+## Creating a Repo
+
+```rust
+use rusticx::prelude::*;
+
+let repo = PostgresRepo::<User>::new("postgres://localhost/mydb").await?;
+repo.migrate().await?;
+```
+
+## PostgreSQL-Specific Types
+
+rusticx maps Rust types to PostgreSQL types as follows:
+
+| Rust Type | PostgreSQL Type |
+|---|---|
+| `Uuid` | `UUID` |
+| `String` | `VARCHAR` |
+| `i32` | `INTEGER` |
+| `i64` | `BIGINT` |
+| `f32` | `REAL` |
+| `f64` | `DOUBLE PRECISION` |
+| `bool` | `BOOLEAN` |
+| `Option<T>` | `T` (nullable) |
+
+## Raw SQL with PostgreSQL
+
+Use sqlx's `$1`, `$2` placeholder syntax for raw queries:
+
+```rust
+let rows = repo
+    .adapter()
+    .query_raw("SELECT id, name FROM users WHERE role = $1 AND score > $2", &[&"admin", &100])
+    .await?;
+```
+
+## Running PostgreSQL Locally
+
+Using Docker:
+
+```bash
+docker run --name rusticx-pg \
+  -e POSTGRES_USER=rusticx \
+  -e POSTGRES_PASSWORD=secret \
+  -e POSTGRES_DB=rusticxdb \
+  -p 5432:5432 \
+  -d postgres:16
+```
+
+```bash
+export DATABASE_URL="postgres://rusticx:secret@localhost:5432/rusticxdb"
+```
