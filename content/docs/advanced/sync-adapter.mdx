@@ -1,0 +1,68 @@
+---
+title: Sync Adapter
+description: Use rusticx in blocking contexts without async/await using SyncAdapter.
+---
+
+rusticx is async-first, but sometimes you need to use it in a synchronous context — a CLI tool, a Rayon parallel iterator, or code that can't use `.await`. The `SyncAdapter` wrapper handles this by internally running the async operations on a Tokio runtime.
+
+## When to Use SyncAdapter
+
+Use `SyncAdapter` when:
+- You are writing a CLI binary where async adds unnecessary complexity
+- You are inside a `std::thread` that can't use `.await`
+- You are integrating with a synchronous library (e.g. a Diesel-style ORM wrapper)
+
+Do **not** use `SyncAdapter` inside an existing Tokio async runtime (e.g. an Axum handler). Blocking inside an async runtime stalls the executor. Use the standard `.await` syntax there instead.
+
+## Setup
+
+```rust
+use rusticx::prelude::*;
+use rusticx::sync::SyncAdapter;
+
+fn main() -> anyhow::Result<()> {
+    let repo = SyncAdapter::new(
+        PostgresRepo::<User>::new("postgres://localhost/mydb")
+    )?;
+
+    repo.migrate()?;
+
+    let user = User {
+        id: uuid::Uuid::new_v4(),
+        email: "alice@example.com".into(),
+        name: "Alice".into(),
+        bio: None,
+    };
+
+    repo.insert(&user)?;
+
+    let found = repo.find_by_id(user.id)?;
+    println!("{:?}", found);
+
+    Ok(())
+}
+```
+
+## API
+
+`SyncAdapter` exposes all the same methods as the async repo but without `.await`:
+
+| Async | Sync via SyncAdapter |
+|---|---|
+| `repo.insert(&item).await?` | `repo.insert(&item)?` |
+| `repo.find_by_id(id).await?` | `repo.find_by_id(id)?` |
+| `repo.find_all().await?` | `repo.find_all()?` |
+| `repo.find().where_clause(...).fetch_all().await?` | `repo.find().where_clause(...).fetch_all()?` |
+| `repo.update().set(...).execute().await?` | `repo.update().set(...).execute()?` |
+| `repo.delete_by_id(id).await?` | `repo.delete_by_id(id)?` |
+| `repo.migrate().await?` | `repo.migrate()?` |
+| `repo.paginate(p, s).await?` | `repo.paginate(p, s)?` |
+
+## Cargo.toml
+
+```toml
+[dependencies]
+rusticx = { version = "0.1", features = ["postgres", "sync"] }
+```
+
+The `sync` feature enables `SyncAdapter`. It is not included in `"full"` by default — you must explicitly opt in.

@@ -1,0 +1,156 @@
+---
+title: API Reference
+description: Complete reference for all public methods, attributes, enums, and types in rusticx.
+---
+
+## Repo Methods
+
+All repo types (`PostgresRepo<T>`, `MySqlRepo<T>`, `MongoRepo<T>`) implement the same trait. Every method is async and returns `Result<_, _>`.
+
+### Creation
+
+| Method | Description |
+|---|---|
+| `PostgresRepo::<T>::new(url)` | Create a new Postgres repo with connection pool |
+| `MySqlRepo::<T>::new(url)` | Create a new MySQL repo with connection pool |
+| `MongoRepo::<T>::new(url, db)` | Create a new MongoDB repo |
+
+### Schema
+
+| Method | Returns | Description |
+|---|---|---|
+| `repo.migrate()` | `Result<()>` | Run `CREATE TABLE IF NOT EXISTS` for the model |
+
+### Insert
+
+| Method | Returns | Description |
+|---|---|---|
+| `repo.insert(&item)` | `Result<()>` | Insert a single record |
+| `repo.insert_many(&items)` | `Result<()>` | Insert multiple records in one statement |
+| `repo.save(&item)` | `Result<()>` | Insert or update (upsert on primary key) |
+
+### Find
+
+| Method | Returns | Description |
+|---|---|---|
+| `repo.find_by_id(id)` | `Result<Option<T>>` | Find by primary key |
+| `repo.find_all()` | `Result<Vec<T>>` | Fetch all records |
+| `repo.find()` | `FindBuilder<T>` | Start a filtered find query |
+| `repo.find_one()` | `FindOneBuilder<T>` | Start a find-single-record query |
+| `repo.paginate(page, size)` | `Result<Page<T>>` | Paginated results (1-indexed) |
+| `repo.count()` | `CountBuilder` | Start a count query |
+
+### Update / Delete
+
+| Method | Returns | Description |
+|---|---|---|
+| `repo.update()` | `UpdateBuilder<T>` | Start an update query |
+| `repo.delete()` | `DeleteBuilder<T>` | Start a filtered delete query |
+| `repo.delete_by_id(id)` | `Result<()>` | Delete by primary key |
+
+### Raw Access
+
+| Method | Returns | Description |
+|---|---|---|
+| `repo.adapter()` | `&Adapter` | Access the underlying database adapter |
+| `adapter.execute_raw(sql, params)` | `Result<()>` | Run raw SQL, no return value |
+| `adapter.query_raw(sql, params)` | `Result<Vec<Row>>` | Run raw SQL, return rows |
+
+---
+
+## Builder Methods
+
+### FindBuilder / FindOneBuilder
+
+| Method | Description |
+|---|---|
+| `.where_clause(col, op, val)` | Add a WHERE condition (multiple = AND) |
+| `.order_by(col, direction)` | Add ORDER BY |
+| `.limit(n)` | Limit result count |
+| `.fetch_all()` | Execute → `Result<Vec<T>>` |
+| `.fetch()` | Execute → `Result<Option<T>>` |
+
+### UpdateBuilder
+
+| Method | Description |
+|---|---|
+| `.where_clause(col, op, val)` | Add a WHERE condition |
+| `.set(col, val)` | Set a column value |
+| `.execute()` | Execute → `Result<()>` |
+
+### DeleteBuilder
+
+| Method | Description |
+|---|---|
+| `.where_clause(col, op, val)` | Add a WHERE condition |
+| `.execute()` | Execute → `Result<()>` |
+
+### CountBuilder
+
+| Method | Description |
+|---|---|
+| `.where_clause(col, op, val)` | Add a WHERE condition |
+| `.fetch()` | Execute → `Result<u64>` |
+
+---
+
+## CondOp Enum
+
+```rust
+pub enum CondOp {
+    Eq,        // =
+    NotEq,     // <>
+    Gt,        // >
+    Gte,       // >=
+    Lt,        // <
+    Lte,       // <=
+    Like,      // LIKE
+    IsNull,    // IS NULL    (pass () as value)
+    IsNotNull, // IS NOT NULL (pass () as value)
+}
+```
+
+## Direction Enum
+
+```rust
+pub enum Direction {
+    Asc,
+    Desc,
+}
+```
+
+## Page\<T\> Struct
+
+Returned by `repo.paginate(page, size)`:
+
+```rust
+pub struct Page<T> {
+    pub items: Vec<T>,
+    pub total: u64,       // Total record count
+    pub page: u64,        // Current page (1-indexed)
+    pub size: u64,        // Page size requested
+    pub total_pages: u64, // ceil(total / size)
+}
+```
+
+---
+
+## Model Attributes
+
+### Struct-level
+
+| Attribute | Description |
+|---|---|
+| `#[rusticx(table = "name")]` | Override table/collection name |
+| `#[rusticx(primary_key = "field")]` | Override primary key field name |
+
+### Field-level
+
+| Attribute | Description |
+|---|---|
+| `#[rusticx(primary_key)]` | Mark as primary key |
+| `#[rusticx(unique)]` | Add UNIQUE constraint |
+| `#[rusticx(nullable)]` | Allow NULL — use with `Option<T>` |
+| `#[rusticx(default = "expr")]` | SQL DEFAULT expression |
+| `#[rusticx(column = "name")]` | Override column name |
+| `#[rusticx(skip)]` | Exclude from persistence |

@@ -1,0 +1,103 @@
+---
+title: Advanced Usage
+description: Raw SQL execution, custom field types, the skip attribute, and other advanced patterns.
+---
+
+## Raw SQL
+
+The query builder covers most common operations. For complex queries that need raw SQL, access the underlying adapter directly:
+
+### execute_raw — No Return Value
+
+Use for `INSERT`, `UPDATE`, `DELETE`, or DDL statements where you don't need results:
+
+```rust
+repo.adapter()
+    .execute_raw(
+        "DELETE FROM sessions WHERE expires_at < NOW() - INTERVAL '7 days'",
+        &[],
+    )
+    .await?;
+```
+
+### query_raw — Return Rows
+
+Use when you need to SELECT data that doesn't map to your model, or for complex JOINs:
+
+```rust
+let rows = repo
+    .adapter()
+    .query_raw(
+        "SELECT u.id, u.name, COUNT(p.id) AS post_count
+         FROM users u
+         LEFT JOIN posts p ON p.user_id = u.id
+         WHERE u.role = $1
+         GROUP BY u.id, u.name",
+        &[&"author"],
+    )
+    .await?;
+```
+
+<Callout type="warn">
+Always use parameterized queries (`$1`, `$2` for Postgres; `?` for MySQL). Never concatenate user input into SQL strings — this prevents SQL injection.
+</Callout>
+
+## The skip Attribute
+
+Use `#[rusticx(skip)]` to exclude a field from all database operations. The field is still part of your Rust struct but rusticx ignores it for INSERT, SELECT, and schema generation:
+
+```rust
+#[derive(Model, Serialize, Deserialize)]
+pub struct User {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    pub name: String,
+    #[rusticx(skip)]
+    pub cached_display_name: String, // Not persisted — computed at runtime
+}
+```
+
+## Custom Column Names
+
+Override the database column name while keeping a different Rust field name:
+
+```rust
+#[derive(Model, Serialize, Deserialize)]
+pub struct Post {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    #[rusticx(column = "body_text")]
+    pub body: String, // Maps to `body_text` column in DB
+}
+```
+
+## SQL DEFAULT Values
+
+Set a SQL-level default expression that runs when a value is not provided:
+
+```rust
+#[derive(Model, Serialize, Deserialize)]
+pub struct Event {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    pub name: String,
+    #[rusticx(default = "NOW()")]
+    pub created_at: String, // Defaults to current timestamp if not set
+}
+```
+
+## Using Multiple Databases
+
+You can have multiple repos pointing to different database backends in the same application:
+
+```rust
+let pg_repo = PostgresRepo::<User>::new(&postgres_url).await?;
+let mongo_repo = MongoRepo::<EventLog>::new(&mongo_url, "logs").await?;
+
+pg_repo.migrate().await?;
+mongo_repo.migrate().await?;
+
+// Use each independently
+let users = pg_repo.find_all().await?;
+let logs = mongo_repo.find_all().await?;
+```
