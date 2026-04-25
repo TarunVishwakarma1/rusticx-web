@@ -1,0 +1,130 @@
+---
+title: Getting Started
+description: Install rusticx and run your first query in under 5 minutes.
+---
+
+## Prerequisites
+
+- Rust 1.75+ (stable)
+- Tokio async runtime
+- A running PostgreSQL, MySQL, or MongoDB instance
+
+## Installation
+
+Add rusticx to your `Cargo.toml`. Use the feature flag for your database:
+
+```toml
+[dependencies]
+# PostgreSQL
+rusticx = { version = "0.1", features = ["postgres"] }
+
+# MySQL / MariaDB
+# rusticx = { version = "0.1", features = ["mysql"] }
+
+# MongoDB
+# rusticx = { version = "0.1", features = ["mongo"] }
+
+# All databases
+# rusticx = { version = "0.1", features = ["full"] }
+
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+anyhow = "1"
+```
+
+## Define Your First Model
+
+Create `src/models.rs`:
+
+```rust
+use rusticx::prelude::*;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Model, Serialize, Deserialize, Debug, Clone)]
+#[rusticx(table = "users")]
+pub struct User {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+
+    #[rusticx(unique)]
+    pub email: String,
+
+    pub name: String,
+
+    #[rusticx(nullable)]
+    pub bio: Option<String>,
+}
+```
+
+The `#[derive(Model)]` macro generates:
+- SQL `CREATE TABLE` statement for `repo.migrate()`
+- Field-to-column mapping for all CRUD operations
+- Serde integration for JSON serialization
+
+## Connect and Migrate
+
+```rust
+// src/main.rs
+mod models;
+use models::User;
+use rusticx::prelude::*;
+use uuid::Uuid;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgres://localhost/mydb".into());
+
+    let repo = PostgresRepo::<User>::new(&database_url).await?;
+
+    // Creates the `users` table if it doesn't exist
+    repo.migrate().await?;
+
+    println!("Connected and migrated successfully!");
+    Ok(())
+}
+```
+
+Set your `DATABASE_URL` environment variable:
+
+```bash
+export DATABASE_URL="postgres://user:password@localhost/mydb"
+cargo run
+```
+
+## Insert and Query
+
+```rust
+// Insert a record
+let user = User {
+    id: Uuid::new_v4(),
+    email: "alice@example.com".into(),
+    name: "Alice".into(),
+    bio: Some("Rustacean".into()),
+};
+repo.insert(&user).await?;
+
+// Find by primary key
+let found = repo.find_by_id(user.id).await?;
+println!("{:?}", found);
+
+// Find all records
+let all_users = repo.find_all().await?;
+println!("Total users: {}", all_users.len());
+
+// Filter query
+let filtered = repo
+    .find()
+    .where_clause("name", CondOp::Eq, "Alice")
+    .fetch_all()
+    .await?;
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Core Concepts" href="/docs/guides/core-concepts" description="Deep dive into Models, Repos, and derive attributes." />
+  <Card title="CRUD Operations" href="/docs/guides/crud-operations" description="Complete reference for all insert, find, update, delete methods." />
+</Cards>

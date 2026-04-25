@@ -1,13 +1,64 @@
 ---
-title: Hello World
-description: Your first document
+title: Overview
+description: rusticx is a blazingly fast, async-first, multi-database ORM for Rust.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+**rusticx** is a Rust ORM that lets you define models with derive macros, auto-generate tables, and perform full CRUD operations — synchronously or asynchronously — across PostgreSQL, MySQL, and MongoDB from a single unified API.
 
-## What is Next?
+## Why rusticx?
+
+Most Rust database libraries require you to either write raw SQL by hand or commit to a single database vendor. rusticx gives you:
+
+- **One API** — the same `repo.find()`, `repo.insert()`, `repo.update()` calls work across all supported backends.
+- **Type safety** — the query builder uses enums (`CondOp`, `Direction`) instead of raw strings, catching mistakes at compile time.
+- **Zero boilerplate** — `#[derive(Model)]` generates table mapping, CRUD methods, and schema migration code automatically.
+- **Async-first** — built on Tokio and sqlx; no blocking calls unless you explicitly opt in via `SyncAdapter`.
+
+## Quick Example
+
+```rust
+use rusticx::prelude::*;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Model, Serialize, Deserialize)]
+#[rusticx(table = "users")]
+pub struct User {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    #[rusticx(unique)]
+    pub email: String,
+    pub name: String,
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let repo = PostgresRepo::<User>::new("postgres://localhost/mydb").await?;
+    repo.migrate().await?;
+
+    let user = User { id: Uuid::new_v4(), email: "alice@example.com".into(), name: "Alice".into() };
+    repo.insert(&user).await?;
+
+    let found = repo.find_by_id(user.id).await?;
+    println!("{:?}", found);
+    Ok(())
+}
+```
+
+## Supported Databases
+
+| Database | Feature Flag | Status |
+|---|---|---|
+| PostgreSQL | `postgres` | Available |
+| MySQL / MariaDB | `mysql` | Available |
+| MongoDB | `mongo` | Available |
+| CockroachDB | `cockroach` | Planned |
+| SQLite | `sqlite` | Planned |
+| Cassandra | `cassandra` | Planned |
+
+## Next Steps
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Getting Started" href="/docs/getting-started" description="Install rusticx and run your first query in 5 minutes." />
+  <Card title="Core Concepts" href="/docs/guides/core-concepts" description="Understand Models, Repos, and the derive macro system." />
 </Cards>
