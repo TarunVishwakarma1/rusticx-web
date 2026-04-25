@@ -1,0 +1,10 @@
+{
+  "title": "Guides",
+  "pages": [
+    "core-concepts",
+    "crud-operations",
+    "query-builder",
+    "migrations",
+    "connection-pooling"
+  ]
+}

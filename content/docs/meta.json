@@ -1,0 +1,10 @@
+{
+  "title": "rusticx Docs",
+  "pages": [
+    "index",
+    "getting-started",
+    "guides",
+    "databases",
+    "advanced"
+  ]
+}
