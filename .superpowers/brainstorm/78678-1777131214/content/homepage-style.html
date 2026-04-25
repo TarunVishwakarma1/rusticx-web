@@ -1,0 +1,100 @@
+<h2>Homepage Visual Direction</h2>
+<p class="subtitle">Which aesthetic fits rusticx best? Each mockup shows a hero + nav + CTA section.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="dark-techy" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0f;padding:20px;border-radius:8px;font-family:monospace;min-height:220px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+          <span style="color:#f97316;font-weight:700;font-size:14px;">⬡ rusticx</span>
+          <span style="color:#555;font-size:12px;margin-left:auto;">Docs</span>
+          <span style="color:#555;font-size:12px;">GitHub</span>
+          <span style="background:#f97316;color:#000;padding:3px 10px;border-radius:4px;font-size:11px;">Get Started →</span>
+        </div>
+        <div style="text-align:center;padding:20px 0;">
+          <div style="color:#f97316;font-size:11px;letter-spacing:3px;margin-bottom:12px;">BLAZINGLY FAST RUST ORM</div>
+          <div style="color:#fff;font-size:26px;font-weight:800;line-height:1.2;margin-bottom:10px;">Query any database.<br/><span style="color:#f97316;">Zero compromise.</span></div>
+          <div style="color:#555;font-size:12px;margin-bottom:20px;">Multi-database. Async-first. Type-safe.</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <span style="background:#f97316;color:#000;padding:6px 16px;border-radius:4px;font-size:12px;font-weight:700;">cargo add rusticx</span>
+            <span style="border:1px solid #333;color:#aaa;padding:6px 16px;border-radius:4px;font-size:12px;">View Docs</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;">
+          <div style="background:#111;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+            <div style="color:#f97316;font-size:16px;font-weight:700;">3</div>
+            <div style="color:#555;font-size:10px;">Databases</div>
+          </div>
+          <div style="background:#111;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+            <div style="color:#f97316;font-size:16px;font-weight:700;">Async</div>
+            <div style="color:#555;font-size:10px;">First</div>
+          </div>
+          <div style="background:#111;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+            <div style="color:#f97316;font-size:16px;font-weight:700;">Macro</div>
+            <div style="color:#555;font-size:10px;">Driven</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Dark & Techy</h3>
+      <p>Black background, orange accents, monospace feel. Inspired by Linear, Warp, Rust's own site. Signals performance and engineering precision.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="bold-editorial" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#fafaf9;padding:20px;border-radius:8px;min-height:220px;font-family:system-ui;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;border-bottom:1px solid #e5e5e5;padding-bottom:16px;">
+          <span style="color:#dc2626;font-weight:900;font-size:15px;">RUSTICX</span>
+          <span style="color:#999;font-size:12px;margin-left:auto;">Docs</span>
+          <span style="color:#999;font-size:12px;">GitHub</span>
+          <span style="background:#dc2626;color:#fff;padding:4px 12px;border-radius:2px;font-size:11px;font-weight:700;">START →</span>
+        </div>
+        <div style="padding:10px 0;">
+          <div style="background:#dc2626;color:#fff;display:inline-block;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:12px;">ORM FOR RUST</div>
+          <div style="font-size:30px;font-weight:900;line-height:1.1;color:#111;margin-bottom:10px;">The ORM that<br/>moves as fast as<br/><span style="color:#dc2626;">your code.</span></div>
+          <div style="display:flex;gap:6px;margin-top:16px;">
+            <span style="background:#111;color:#fff;padding:6px 14px;font-size:11px;font-weight:700;">INSTALL</span>
+            <span style="border:2px solid #111;color:#111;padding:6px 14px;font-size:11px;font-weight:700;">READ DOCS</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;background:#f5f5f4;border-radius:4px;padding:10px;font-size:10px;color:#666;font-family:monospace;">
+          #[derive(Model)] struct User &#123; id: Uuid, name: String &#125;
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Bold Editorial / Magazine</h3>
+      <p>Strong typography, high contrast, red-on-white. Inspired by Awwwards winners, Stripe Press. Commands attention. True magazine aesthetic.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="gradient-modern" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%);padding:20px;border-radius:8px;min-height:220px;font-family:system-ui;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+          <span style="color:#a78bfa;font-weight:700;font-size:14px;">◈ rusticx</span>
+          <span style="color:#7c6fc2;font-size:12px;margin-left:auto;">Docs</span>
+          <span style="color:#7c6fc2;font-size:12px;">GitHub</span>
+          <span style="background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;">Get Started</span>
+        </div>
+        <div style="text-align:center;padding:16px 0;">
+          <div style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;margin-bottom:14px;">Multi-database Rust ORM</div>
+          <div style="color:#fff;font-size:24px;font-weight:800;line-height:1.25;margin-bottom:10px;">One ORM.<br/><span style="background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Every database.</span></div>
+          <div style="color:#9ca3af;font-size:11px;margin-bottom:18px;">Async-first · Type-safe · Derive macros</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <span style="background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;padding:6px 16px;border-radius:8px;font-size:12px;">Quick Start</span>
+            <span style="background:rgba(255,255,255,0.1);color:#e5e7eb;padding:6px 16px;border-radius:8px;font-size:12px;border:1px solid rgba(255,255,255,0.15);">Docs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Gradient Modern</h3>
+      <p>Deep purple/indigo gradients, glassy elements, pill badges. Inspired by Vercel, Planetscale, Resend. Premium SaaS feel with visual depth.</p>
+    </div>
+  </div>
+
+</div>

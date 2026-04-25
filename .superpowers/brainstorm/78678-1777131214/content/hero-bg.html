@@ -1,0 +1,74 @@
+<h2>Hero Background Style</h2>
+<p class="subtitle">Sets the visual mood for the entire page. All on black #0a0a0f with orange #f97316 accents.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="grid-lines" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0f;border-radius:8px;min-height:200px;position:relative;overflow:hidden;">
+        <!-- Animated grid lines via CSS -->
+        <style>
+          @keyframes gridScroll { from { transform: translateY(0); } to { transform: translateY(40px); } }
+          @keyframes gridScrollX { from { transform: translateX(0); } to { transform: translateX(40px); } }
+        </style>
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(249,115,22,0.07) 1px, transparent 1px),linear-gradient(90deg, rgba(249,115,22,0.07) 1px, transparent 1px);background-size:40px 40px;animation:gridScroll 3s linear infinite;"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%, rgba(249,115,22,0.12) 0%, transparent 70%);"></div>
+        <div style="position:relative;z-index:2;padding:30px;text-align:center;">
+          <div style="color:#f97316;font-size:9px;letter-spacing:3px;font-family:monospace;margin-bottom:10px;">BLAZINGLY FAST RUST ORM</div>
+          <div style="color:#fff;font-size:20px;font-weight:800;font-family:system-ui;line-height:1.2;">Query any database.<br/><span style="color:#f97316;">Zero compromise.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Scrolling Grid</h3>
+      <p>Animated perspective grid scrolls upward. Orange glow at center. Very techy — like a terminal viewport or spatial computing UI. Classic "hacker" aesthetic.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="noise-glow" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0f;border-radius:8px;min-height:200px;position:relative;overflow:hidden;">
+        <style>
+          @keyframes pulseGlow { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.1)} }
+        </style>
+        <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse, rgba(249,115,22,0.3) 0%, transparent 70%);animation:pulseGlow 4s ease-in-out infinite;border-radius:50%;"></div>
+        <div style="position:absolute;bottom:-40px;left:20%;width:200px;height:150px;background:radial-gradient(ellipse, rgba(234,88,12,0.15) 0%, transparent 70%);border-radius:50%;"></div>
+        <div style="position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");"></div>
+        <div style="position:relative;z-index:2;padding:30px;text-align:center;">
+          <div style="color:#f97316;font-size:9px;letter-spacing:3px;font-family:monospace;margin-bottom:10px;">BLAZINGLY FAST RUST ORM</div>
+          <div style="color:#fff;font-size:20px;font-weight:800;font-family:system-ui;line-height:1.2;">Query any database.<br/><span style="color:#f97316;">Zero compromise.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Ambient Glow + Noise</h3>
+      <p>Pulsing orange radial glow, subtle film-grain noise texture. No geometry. Feels premium and cinematic — like Vercel's dark mode or Linear's hero. Modern SaaS.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="code-rain" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0f;border-radius:8px;min-height:200px;position:relative;overflow:hidden;">
+        <style>
+          @keyframes fall1 { from{transform:translateY(-100%)} to{transform:translateY(300%)} }
+          @keyframes fall2 { from{transform:translateY(-150%)} to{transform:translateY(300%)} }
+          @keyframes fall3 { from{transform:translateY(-80%)} to{transform:translateY(300%)} }
+        </style>
+        <div style="position:absolute;left:8%;top:0;font-family:monospace;font-size:8px;color:rgba(249,115,22,0.2);animation:fall1 6s linear infinite;white-space:nowrap;">#[derive<br/>Model]<br/>struct<br/>User<br/>&#123;id:<br/>Uuid&#125;</div>
+        <div style="position:absolute;left:30%;top:0;font-family:monospace;font-size:8px;color:rgba(249,115,22,0.15);animation:fall2 8s linear infinite;white-space:nowrap;">repo.<br/>find<br/>_all()<br/>.await<br/>.unwrap</div>
+        <div style="position:absolute;left:55%;top:0;font-family:monospace;font-size:8px;color:rgba(249,115,22,0.18);animation:fall3 7s linear infinite;white-space:nowrap;">INSERT<br/>INTO<br/>users<br/>VALUES<br/>($1)</div>
+        <div style="position:absolute;left:75%;top:0;font-family:monospace;font-size:8px;color:rgba(249,115,22,0.12);animation:fall1 9s linear infinite 1s;white-space:nowrap;">.where<br/>(id<br/>Eq<br/>uuid)<br/>.limit</div>
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%, rgba(10,10,15,0.7) 30%, transparent 80%);"></div>
+        <div style="position:relative;z-index:2;padding:30px;text-align:center;">
+          <div style="color:#f97316;font-size:9px;letter-spacing:3px;font-family:monospace;margin-bottom:10px;">BLAZINGLY FAST RUST ORM</div>
+          <div style="color:#fff;font-size:20px;font-weight:800;font-family:system-ui;line-height:1.2;">Query any database.<br/><span style="color:#f97316;">Zero compromise.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Falling Code Rain</h3>
+      <p>Rust code snippets rain down in background (Matrix-inspired but with real rusticx syntax). Fades behind hero text. Immediately communicates "this is a code library." Distinctive.</p>
+    </div>
+  </div>
+
+</div>
