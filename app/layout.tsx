@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="flex flex-col min-h-screen font-[var(--font-inter)]">
+      <body className="flex flex-col min-h-screen font-[--font-inter]">
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
