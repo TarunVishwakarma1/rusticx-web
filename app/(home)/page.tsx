@@ -1,16 +1,12 @@
-import Link from 'next/link';
+import CodeRain from '@/components/CodeRain';
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col justify-center text-center flex-1">
-      <h1 className="text-2xl font-bold mb-4">Hello World</h1>
-      <p>
-        You can open{' '}
-        <Link href="/docs" className="font-medium underline">
-          /docs
-        </Link>{' '}
-        and see the documentation.
-      </p>
+    <div className="relative h-screen bg-[#0a0a0f] overflow-hidden">
+      <CodeRain className="absolute inset-0 w-full h-full" />
+      <div className="relative z-10 flex items-center justify-center h-full text-white text-2xl font-bold">
+        Code Rain Test
+      </div>
     </div>
   );
 }
