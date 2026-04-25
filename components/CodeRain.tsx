@@ -18,18 +18,19 @@ export default function CodeRain({ className }: CodeRainProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
+    let animId: number = 0;
     const fontSize = 14;
+    let cols = 0;
+    let drops: number[] = [];
 
     const setup = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
+      cols = Math.floor(canvas.width / fontSize);
+      // Stagger starting positions so rain doesn't all start together
+      drops = Array.from({ length: cols }, () => Math.random() * -100);
     };
     setup();
-
-    const cols = Math.floor(canvas.width / fontSize);
-    // Stagger starting positions so rain doesn't all start together
-    const drops: number[] = Array.from({ length: cols }, () => Math.random() * -100);
 
     const draw = () => {
       // Low-alpha fill creates the trailing fade effect
