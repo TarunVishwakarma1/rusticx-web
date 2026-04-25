@@ -1,0 +1,61 @@
+---
+title: Query Builder
+description: Composable, type-safe queries using CondOp, Direction, and method chaining.
+---
+
+The rusticx query builder lets you construct `WHERE`, `ORDER BY`, and `LIMIT` clauses without writing raw SQL strings. All conditions use the `CondOp` enum so typos are caught at compile time.
+
+## CondOp — Comparison Operators
+
+| Variant | SQL equivalent | Example |
+|---|---|---|
+| `CondOp::Eq` | `= $1` | `.where_clause("id", CondOp::Eq, user_id)` |
+| `CondOp::NotEq` | `<> $1` | `.where_clause("status", CondOp::NotEq, "banned")` |
+| `CondOp::Gt` | `> $1` | `.where_clause("age", CondOp::Gt, 18)` |
+| `CondOp::Gte` | `>= $1` | `.where_clause("score", CondOp::Gte, 100)` |
+| `CondOp::Lt` | `< $1` | `.where_clause("price", CondOp::Lt, 50.0)` |
+| `CondOp::Lte` | `<= $1` | `.where_clause("stock", CondOp::Lte, 0)` |
+| `CondOp::Like` | `LIKE $1` | `.where_clause("name", CondOp::Like, "%alice%")` |
+| `CondOp::IsNull` | `IS NULL` | `.where_clause("bio", CondOp::IsNull, ())` |
+| `CondOp::IsNotNull` | `IS NOT NULL` | `.where_clause("bio", CondOp::IsNotNull, ())` |
+
+## Direction — Sort Order
+
+```rust
+use rusticx::prelude::Direction;
+
+// Ascending
+.order_by("created_at", Direction::Asc)
+
+// Descending
+.order_by("score", Direction::Desc)
+```
+
+## Chaining
+
+Multiple `.where_clause()` calls are combined with `AND`:
+
+```rust
+let results = repo
+    .find()
+    .where_clause("role", CondOp::Eq, "admin")
+    .where_clause("score", CondOp::Gte, 500)
+    .where_clause("bio", CondOp::IsNotNull, ())
+    .order_by("score", Direction::Desc)
+    .limit(10)
+    .fetch_all()
+    .await?;
+// SQL: WHERE role = $1 AND score >= $2 AND bio IS NOT NULL ORDER BY score DESC LIMIT 10
+```
+
+## Available Builder Methods
+
+| Method | Description |
+|---|---|
+| `.where_clause(col, op, val)` | Add a WHERE condition |
+| `.order_by(col, direction)` | Add ORDER BY clause |
+| `.limit(n)` | Limit result count |
+| `.set(col, val)` | Set a column value (update builder only) |
+| `.fetch_all()` | Execute and return `Vec<T>` |
+| `.fetch()` | Execute and return `Option<T>` or scalar |
+| `.execute()` | Execute with no return value (update/delete) |

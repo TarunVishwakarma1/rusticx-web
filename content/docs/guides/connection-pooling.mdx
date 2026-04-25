@@ -1,0 +1,86 @@
+---
+title: Connection Pooling
+description: How rusticx manages database connection pools for SQL and MongoDB backends.
+---
+
+rusticx handles connection pooling automatically. When you call `PostgresRepo::new()` or `MySqlRepo::new()`, rusticx creates a sqlx connection pool under the hood and holds it for the lifetime of the repo.
+
+## SQL Databases (PostgreSQL, MySQL)
+
+rusticx uses [sqlx](https://github.com/launchbadge/sqlx) PgPool / MySqlPool internally.
+
+```rust
+let repo = PostgresRepo::<User>::new("postgres://user:pass@localhost/mydb").await?;
+```
+
+The connection string format follows standard URI syntax:
+
+```
+postgres://username:password@host:port/database
+mysql://username:password@host:port/database
+```
+
+### Pool Configuration
+
+By default, rusticx uses sqlx's default pool settings (max 10 connections). To customize, use the `DATABASE_URL` environment variable or pass a full connection string with query parameters:
+
+```
+postgres://user:pass@localhost/mydb?pool_max_connections=20&pool_min_connections=2
+```
+
+## MongoDB
+
+For MongoDB, rusticx uses the official [mongodb](https://crates.io/crates/mongodb) async client, which maintains its own connection pool:
+
+```rust
+let repo = MongoRepo::<User>::new("mongodb://localhost:27017", "mydb").await?;
+```
+
+## Best Practice: Share the Repo
+
+Create the repo once and share it across your application — do not create a new repo per request. With Axum:
+
+```rust
+use axum::{extract::State, routing::get, Router};
+use std::sync::Arc;
+
+#[derive(Clone)]
+struct AppState {
+    users: Arc<PostgresRepo<User>>,
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let repo = PostgresRepo::<User>::new(&std::env::var("DATABASE_URL")?).await?;
+    repo.migrate().await?;
+
+    let state = AppState { users: Arc::new(repo) };
+
+    let app = Router::new()
+        .route("/users", get(list_users))
+        .with_state(state);
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+    axum::serve(listener, app).await?;
+    Ok(())
+}
+
+async fn list_users(State(state): State<AppState>) -> String {
+    let users = state.users.find_all().await.unwrap();
+    format!("{} users", users.len())
+}
+```
+
+## Environment Variables
+
+Store connection strings in environment variables — never hardcode credentials:
+
+```bash
+# .env
+DATABASE_URL=postgres://user:password@localhost:5432/mydb
+```
+
+```rust
+let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+let repo = PostgresRepo::<User>::new(&db_url).await?;
+```

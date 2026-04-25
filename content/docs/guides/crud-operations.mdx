@@ -1,0 +1,144 @@
+---
+title: CRUD Operations
+description: Complete reference for all insert, find, update, and delete operations in rusticx.
+---
+
+All examples below use `PostgresRepo` but the same API applies to `MySqlRepo` and `MongoRepo`.
+
+## Insert
+
+### Single record
+
+```rust
+let user = User {
+    id: Uuid::new_v4(),
+    email: "alice@example.com".into(),
+    name: "Alice".into(),
+    bio: None,
+};
+repo.insert(&user).await?;
+```
+
+### Multiple records
+
+```rust
+let users = vec![
+    User { id: Uuid::new_v4(), email: "bob@example.com".into(), name: "Bob".into(), bio: None },
+    User { id: Uuid::new_v4(), email: "carol@example.com".into(), name: "Carol".into(), bio: None },
+];
+repo.insert_many(&users).await?;
+```
+
+### Insert or update (upsert)
+
+`save()` inserts the record if the primary key doesn't exist, or updates it if it does:
+
+```rust
+repo.save(&user).await?;
+```
+
+## Find
+
+### By primary key
+
+```rust
+let user: Option<User> = repo.find_by_id(user_id).await?;
+```
+
+### All records
+
+```rust
+let users: Vec<User> = repo.find_all().await?;
+```
+
+### Single record matching a filter
+
+```rust
+let user: Option<User> = repo
+    .find_one()
+    .where_clause("email", CondOp::Eq, "alice@example.com")
+    .fetch()
+    .await?;
+```
+
+### Filtered list
+
+```rust
+let users: Vec<User> = repo
+    .find()
+    .where_clause("name", CondOp::Eq, "Alice")
+    .order_by("created_at", Direction::Desc)
+    .limit(20)
+    .fetch_all()
+    .await?;
+```
+
+### Paginate
+
+```rust
+let page = repo.paginate(1, 20).await?;
+// page.items: Vec<User>
+// page.total: u64
+// page.total_pages: u64
+// page.page: u64
+```
+
+### Count
+
+```rust
+// Total count
+let total: u64 = repo.count().fetch().await?;
+
+// Count with filter
+let active: u64 = repo
+    .count()
+    .where_clause("bio", CondOp::IsNotNull, ())
+    .fetch()
+    .await?;
+```
+
+## Update
+
+```rust
+repo.update()
+    .where_clause("id", CondOp::Eq, user.id)
+    .set("name", "Alice Smith")
+    .set("bio", "Senior Rustacean")
+    .execute()
+    .await?;
+```
+
+Multiple `.set()` calls are chained — all fields update in a single query.
+
+## Delete
+
+### By primary key
+
+```rust
+repo.delete_by_id(user.id).await?;
+```
+
+### By filter
+
+```rust
+repo.delete()
+    .where_clause("email", CondOp::Eq, "alice@example.com")
+    .execute()
+    .await?;
+```
+
+## Raw SQL
+
+For queries that the builder can't express, use the underlying adapter directly:
+
+```rust
+// Execute a statement (no return value)
+repo.adapter().execute_raw("DELETE FROM users WHERE created_at < NOW() - INTERVAL '1 year'", &[]).await?;
+
+// Query rows
+let rows = repo.adapter().query_raw("SELECT id, name FROM users WHERE role = $1", &[&"admin"]).await?;
+```
+
+<Callout type="warn">
+Raw SQL bypasses the type-safe query builder. Validate all user-supplied input before passing it to `execute_raw` or `query_raw`.
+</Callout>

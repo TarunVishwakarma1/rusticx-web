@@ -1,0 +1,64 @@
+---
+title: Migrations
+description: Automatic schema creation and management with repo.migrate().
+---
+
+rusticx includes a built-in migration system driven by your model definitions. When you call `repo.migrate()`, rusticx generates and runs a `CREATE TABLE IF NOT EXISTS` statement for your model.
+
+## Running Migrations
+
+```rust
+let repo = PostgresRepo::<User>::new(&database_url).await?;
+repo.migrate().await?;
+```
+
+Call `migrate()` once at application startup, before any other database operations. It is safe to call on every startup — the `IF NOT EXISTS` guard means it is a no-op if the table already exists.
+
+## What Gets Generated
+
+Given this model:
+
+```rust
+#[derive(Model, Serialize, Deserialize)]
+#[rusticx(table = "users")]
+pub struct User {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    #[rusticx(unique)]
+    pub email: String,
+    pub name: String,
+    #[rusticx(nullable)]
+    pub bio: Option<String>,
+}
+```
+
+rusticx generates and executes:
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    email VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
+    bio VARCHAR
+);
+```
+
+## Migrating Multiple Models
+
+Call `migrate()` on each repo at startup:
+
+```rust
+let user_repo = PostgresRepo::<User>::new(&db_url).await?;
+let post_repo = PostgresRepo::<Post>::new(&db_url).await?;
+
+user_repo.migrate().await?;
+post_repo.migrate().await?;
+```
+
+## Limitations
+
+<Callout type="warn">
+rusticx migration only handles `CREATE TABLE IF NOT EXISTS`. It does **not** handle `ALTER TABLE` for adding, removing, or renaming columns on existing tables. If you add a field to an existing model in a running production database, you must write and run that `ALTER TABLE` migration manually.
+</Callout>
+
+For production schema management, pair rusticx with a dedicated migration tool such as [sqlx migrate](https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md) or [refinery](https://github.com/rust-db/refinery).

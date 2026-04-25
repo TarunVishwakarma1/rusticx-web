@@ -1,0 +1,80 @@
+---
+title: Core Concepts
+description: Understand Models, Repos, and how the derive macro system works in rusticx.
+---
+
+## Models
+
+A **Model** is a Rust struct that maps to a database table (SQL) or collection (MongoDB). You define it as a normal struct and apply `#[derive(Model)]`:
+
+```rust
+use rusticx::prelude::*;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Model, Serialize, Deserialize, Debug)]
+#[rusticx(table = "products")]
+pub struct Product {
+    #[rusticx(primary_key)]
+    pub id: Uuid,
+    pub name: String,
+    pub price: f64,
+    #[rusticx(nullable)]
+    pub description: Option<String>,
+}
+```
+
+### Struct-level Attributes
+
+| Attribute | Description |
+|---|---|
+| `#[rusticx(table = "name")]` | Override the table/collection name. Defaults to the struct name in snake_case. |
+| `#[rusticx(primary_key = "field")]` | Override which field is the primary key. Defaults to `id`. |
+
+### Field-level Attributes
+
+| Attribute | Description |
+|---|---|
+| `#[rusticx(primary_key)]` | Marks this field as the primary key. |
+| `#[rusticx(unique)]` | Adds a UNIQUE constraint on this column. |
+| `#[rusticx(nullable)]` | Allows NULL — use with `Option<T>` fields. |
+| `#[rusticx(default = "expr")]` | SQL DEFAULT expression (e.g. `default = "NOW()"`). |
+| `#[rusticx(column = "name")]` | Override the column name for this field. |
+| `#[rusticx(skip)]` | Exclude this field from persistence entirely. |
+
+## Repos
+
+A **Repo** is the entry point for all database operations on a given model. You create one per model per database connection:
+
+```rust
+// PostgreSQL
+let repo = PostgresRepo::<User>::new(&database_url).await?;
+
+// MySQL
+let repo = MySqlRepo::<User>::new(&database_url).await?;
+
+// MongoDB
+let repo = MongoRepo::<User>::new(&database_url, "mydb").await?;
+```
+
+The repo holds a connection pool internally. Creating it is an async operation that establishes the pool. Reuse the same repo instance throughout your application — do not create a new one per request.
+
+## The Derive Macro
+
+`#[derive(Model)]` is a procedural macro that generates code at compile time. Given your struct, it produces:
+
+1. **Schema definition** — a `CREATE TABLE IF NOT EXISTS` statement used by `repo.migrate()`
+2. **Column mapping** — `INSERT`, `SELECT`, `UPDATE` statements with correct column names
+3. **Primary key accessor** — used by `find_by_id` and `delete_by_id`
+
+You never write this code manually. If you add a field to your struct, re-running the migration (calling `repo.migrate()`) updates the schema.
+
+## Prelude
+
+Import everything you need from `rusticx::prelude::*`:
+
+```rust
+use rusticx::prelude::*;
+// Brings in: Model derive macro, CondOp, Direction, PostgresRepo,
+// MySqlRepo, MongoRepo, SyncAdapter, and all trait bounds.
+```
