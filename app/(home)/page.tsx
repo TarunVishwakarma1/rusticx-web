@@ -115,19 +115,16 @@ const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
 const DATABASES = [
   {
     name: 'PostgreSQL',
-    feature: 'postgres',
     status: 'Available',
     install: 'rusticx = { version = "0.1", features = ["postgres"] }',
   },
   {
     name: 'MySQL / MariaDB',
-    feature: 'mysql',
     status: 'Available',
     install: 'rusticx = { version = "0.1", features = ["mysql"] }',
   },
   {
     name: 'MongoDB',
-    feature: 'mongo',
     status: 'Available',
     install: 'rusticx = { version = "0.1", features = ["mongo"] }',
   },
@@ -150,6 +147,7 @@ export default function HomePage() {
             background:
               'radial-gradient(ellipse 60% 60% at 50% 50%, transparent 20%, #0a0a0f 75%)',
           }}
+          aria-hidden="true"
         />
 
         {/* Hero content */}
@@ -300,6 +298,7 @@ export default function HomePage() {
             background:
               'radial-gradient(ellipse 50% 80% at 50% 100%, rgba(249,115,22,0.08) 0%, transparent 70%)',
           }}
+          aria-hidden="true"
         />
         <div className="relative z-10 text-center max-w-2xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black mb-4">
@@ -309,8 +308,7 @@ export default function HomePage() {
             Add rusticx to your Cargo.toml and query your first record in under 5 minutes.
           </p>
           <div className="bg-[#111116] border border-white/10 rounded-xl p-4 mb-8 font-mono text-sm text-neutral-300 text-left max-w-md mx-auto">
-            <span className="text-neutral-600 select-none">$ </span>
-            cargo add rusticx --features postgres
+            <pre><code><span className="text-neutral-600 select-none" aria-hidden="true">$ </span>cargo add rusticx --features postgres</code></pre>
           </div>
           <div className="flex gap-4 justify-center">
             <Link
