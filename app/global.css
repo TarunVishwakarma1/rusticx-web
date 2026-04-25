@@ -10,3 +10,20 @@ html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/* Orange accent for Fumadocs UI */
+:root {
+  --color-fd-primary: 249 115 22;
+  --color-fd-ring: 249 115 22;
+}
+
+.dark {
+  --color-fd-primary: 249 115 22;
+  --color-fd-ring: 249 115 22;
+}
+
+/* Code rain canvas fills its parent without pointer events */
+.code-rain-canvas {
+  display: block;
+  pointer-events: none;
+}
